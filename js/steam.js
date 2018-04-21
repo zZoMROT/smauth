@@ -65745,9 +65745,9 @@ function extend() {
 },{}],308:[function(require,module,exports){
 var SteamCommunity = require('node-steamcommunity-master');
 
-var community = new SteamCommunity();
-
 window.doLogin = function(callback, accountName, password, authCode, captcha) {
+	var community = new SteamCommunity();
+
 	community.login({
 		"accountName": accountName,
 		"password": password,
@@ -65779,41 +65779,43 @@ window.doLogin = function(callback, accountName, password, authCode, captcha) {
 		}
 
 		console.log("Logged on!");
-		callback({status: 'ok', sessionID: sessionID, cookie: cookies, steamguard: steamguard, steamid: steamid});
+		callback({status: 'ok', sessionID: sessionID, cookie: cookies, steamguard: steamguard, steamid: steamid, community: community});
 		return;
-		/*
-		community.enableTwoFactor(function(err, response) {
-			if(err) {
-				if(err.eresult == 2) {
-					console.log("Error: Failed to enable two-factor authentication. Do you have a phone number attached to your account?");
-					process.exit();
-					return;
-				}
+	});
+}
 
-				if(err.eresult == 84) {
-					console.log("Error: RateLimitExceeded. Try again later.");
-					process.exit();
-					return;
-				}
-
-				console.log(err);
-				process.exit();
+window.enableTwoFactor = function(community, callback){
+	community.enableTwoFactor(function(err, response) {
+		if(err) {
+			if(err.eresult == 2) {
+				console.log("Error: Failed to enable two-factor authentication. Do you have a phone number attached to your account?");
+				callback({status: 'error', err: "Error: Failed to enable two-factor authentication. Do you have a phone number attached to your account?"});
 				return;
 			}
 
-			if(response.status != 1) {
-				console.log("Error: Status " + response.status);
-				process.exit();
+			if(err.eresult == 84) {
+				console.log("Error: RateLimitExceeded. Try again later.");
+				callback({status: 'error', err: "Error: RateLimitExceeded. Try again later."});
 				return;
 			}
 
-			console.log("Writing secrets to twofactor_" + community.steamID.getSteamID64() + ".json");
-			console.log("Revocation code: " + response.revocation_code);
-			fs.writeFile("twofactor_" + community.steamID.getSteamID64() + ".json", JSON.stringify(response, null, "\t"));
+			console.log(err);
+			callback({status: 'error', err: err.toString()});
+			return;
+		}
 
-			promptActivationCode(response);
-		});
-		*/
+		if(response.status != 1) {
+			console.log("Error: Status " + response.status);
+			callback({status: 'error', err: "Error: Wrong Response Status " + response.status});
+			return;
+		}
+
+		console.log("Writing secrets to twofactor_" + community.steamID.getSteamID64() + ".json");
+		console.log("Revocation code: " + response.revocation_code);
+		callback({status: 'ok'});
+		//fs.writeFile("twofactor_" + community.steamID.getSteamID64() + ".json", JSON.stringify(response, null, "\t"));
+
+		//promptActivationCode(response);
 	});
 }
 /*

@@ -1,4 +1,5 @@
 var accounts = [];
+var escrow = [];
 
 create_addNewAccount();
 load_cookies();
@@ -18,7 +19,7 @@ function DEBUG(o){
 	return res;
 }
 
-$('.button28').click(function(){
+$('#addAccountButton').click(function(){
 	if($('#login').val() == ""){
 		$('#login').fadeTo(100, 0.1).fadeTo(200, 1.0);
 		return;
@@ -28,7 +29,8 @@ $('.button28').click(function(){
 		return;
 	}
 	
-	$('.button28').hide();
+	$('.form_get_escrow').hide();
+	$('#addAccountButton').hide();
 	$('#login').attr('disabled', true);
 	$('#password').attr('disabled', true);
 	$('.notification').hide();
@@ -36,19 +38,23 @@ $('.button28').click(function(){
 		if(result.status == 'error'){
 			$('.notification').show();
 			var error_msg = result.err;
-			if( result.err.indexOf('TypeError: Failed to fetch') !== -1 ||
-				result.err.indexOf('Access-Control-Allow-Origin') !== -1 )
+			if(result.err.indexOf('Access-Control-Allow-Origin') !== -1)
 				error_msg = "Use https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi";
+			if(result.err.indexOf('TypeError: Failed to fetch') !== -1)
+				error_msg = "Steam is not stable, retry";
 			$('.notification').html(error_msg);
 
-			$('.button28').show();
+			$('#addAccountButton').show();
 			$('#login').attr('disabled', false);
 			$('#password').attr('disabled', false);
 			return;
 		}
 
 		if(result.status == 'ok'){
-			accounts[$('#login').val()] = {password:$('#password').val(), sessionID: result.sessionID, cookie: result.cookies, steamguard: result.steamguard, steamid: result.steamid};
+			$(".form_login").hide();
+
+			accounts[$('#login').val()] = { password:$('#password').val(), sessionID: result.sessionID, cookie: result.cookies, steamguard: result.steamguard, steamid: result.steamid,
+											community: result.community };
 			if(getCookie('accounts') == undefined)
 				setCookie('accounts', $('#login').val(), { expires: 3600*10 });
 			else
@@ -66,17 +72,47 @@ $('.button28').click(function(){
 	//$(".form_login").hide();
 });
 
+var getEscrowButton_interval;
+var geb_interval_count = 0;
+$('#getEscrowButton').click(function(){
+	$(this).hide();
+	$("#gettingEscrowText").show();
+	getEscrowButton_interval = setInterval(function(){
+		geb_interval_count++;
+		var dots = '';
+		for(var i = 0; i < geb_interval_count%4; i++)
+			dots += '. ';
+		$('#gettingEscrowText').html('Getting ' + dots);
+	}, 500); 
+
+	var accountName = $('#fge_accountName').html().split(' ')[0];
+	enableTwoFactor(accounts[accountName].community, function(result){
+		clearInterval(getEscrowButton_interval);
+
+		if(result.status == 'error'){
+			$('.notification').show();
+			var error_msg = result.err;
+			$('.notification').html(error_msg);
+			$('#getEscrowButton').show();
+			$("#gettingEscrowText").hide();
+
+			return;
+		}
+	});
+});
+
 function create_addNewAccount(){
 	$('.rounded').append('<li id="addnewaccount"><a href="#">ADD NEW ACCOUNT</a></li>');
 
 	$("#addnewaccount").click(function(){
 		$(".form_login").show();
+		$('.form_get_escrow').hide();
 
 		$('#login').val('');
 		$('#password').val('');
 		$('#captcha').hide();
 		$('.notification').hide();
-		$('.button28').show();
+		$('#addAccountButton').show();
 		$('#login').attr('disabled', false);
 		$('#password').attr('disabled', false);
 	});
@@ -95,14 +131,18 @@ function load_cookies(){
 
 function addRounded(accountName){
 	$('#addnewaccount').remove();
-	$('.rounded').append('<li class="account"><a href="#"><div class="close"></div>'+accountName+'</br>'+accounts[accountName].steamid+'</a></li>');
+	$('.rounded').append('<li class="account"><a href="#"><div class="close"></div>'+accountName+'<br>'+accounts[accountName].steamid+'</a></li>');
 	create_addNewAccount();
 
 	$('.account').click(function(){
 		$(".form_login").hide();
+		$('.form_get_escrow').hide();
+		clickAtAccount($(this));
 	});
 
 	$('.close').click(function(){
+		$(".form_login").hide();
+		$('.form_get_escrow').hide();
 		$(this).parent().parent().remove();
 		deleteCookie($(this).parent().html().split('</div>')[1].split('<')[0]);
 	});

@@ -1,6 +1,7 @@
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="css/style.css">
+		<link rel="stylesheet" type="text/css" href="css/rounded.css">
 		<style>
 		body  {
 			background-image: url("images/bg.jpg");
@@ -20,19 +21,29 @@
 			</div>
 
 			<div class="workspace">
+				<div class="notification"></div><br>
+				
 				<div class="form_login">
-					<div class="notification"></div></br>
-					<input id="login" placeholder="LOGIN" /></br></br>
-					<input id="password" type="password" placeholder="PASSWORD" /></br></br></br>
-					<img id="captcha" src=" "></br></br>
-					<a href="#" class="button28">ADD ACCOUNT</a>
+					<input id="login" placeholder="LOGIN" /><br><br>
+					<input id="password" type="password" placeholder="PASSWORD" /><br><br><br>
+					<img id="captcha" src=" "><br><br>
+					<a id="addAccountButton" href="#" class="button28">ADD ACCOUNT</a>
 				</div>
+
+				<div class="form_get_escrow">
+					<b><a id="fge_accountName"></a></b><br>
+					<a>Your account without ESCROW</a><br><br>
+					<a id="getEscrowButton" href="#" class="button28">GET ESCROW</a>
+					<a id="gettingEscrowText"></a>
+				</div>				
 			</div>
 		</div>
 	</body>
 
 	<script type="text/javascript" src="./js/lib/jquery-1.8.3.min.js"></script>
-	<script type="text/javascript" src="./js/cookie.js"></script>
-	<script type="text/javascript" src="./js/main.js"></script>
 	<script type="text/javascript" src="./js/steam.js"></script>
+	<script type="text/javascript" src="./js/cookie.js"></script>
+	<script type="text/javascript" src="./js/account.js"></script>
+	<script type="text/javascript" src="./js/main.js"></script>
+	
 </html>
