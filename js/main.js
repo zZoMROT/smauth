@@ -45,7 +45,8 @@ $('.button28').click(function(){
 		if(result.status == 'error'){
 			$('.notification').show();
 			var error_msg = result.err;
-			if(result.err.indexOf('TypeError: Failed to fetch') !== -1)
+			if( result.err.indexOf('TypeError: Failed to fetch') !== -1 ||
+				result.err.indexOf('Access-Control-Allow-Origin') !== -1 )
 				error_msg = "Use https://chrome.google.com/webstore/detail/allow-control-allow-origi/nlfbmbojpeacfghkpbjhddihlkkiljbi";
 			$('.notification').html(error_msg);
 
