@@ -10,15 +10,6 @@ if (!navigator.cookieEnabled) {
   alert( 'Enable cookie' );
 }
 
-$('.account').click(function(){
-	$(".form_login").hide();
-});
-
-$('.close').click(function(){
-	$(this).parent().parent().remove();
-	deleteCookie($(this).parent().html().split('</div>')[1].split('<')[0]);
-});
-
 function DEBUG(o){
 	var res = '';
 	for(var key in o){
@@ -106,4 +97,14 @@ function addRounded(accountName){
 	$('#addnewaccount').remove();
 	$('.rounded').append('<li class="account"><a href="#"><div class="close"></div>'+accountName+'</br>'+accounts[accountName].steamid+'</a></li>');
 	create_addNewAccount();
+
+	$('.account').click(function(){
+		$(".form_login").hide();
+	});
+
+	$('.close').click(function(){
+		$(this).parent().parent().remove();
+		deleteCookie($(this).parent().html().split('</div>')[1].split('<')[0]);
+	});
+
 }
