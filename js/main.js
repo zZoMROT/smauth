@@ -59,7 +59,7 @@ $('#addAccountButton').click(function(){
 				setCookie('accounts', $('#login').val(), { expires: 3600*10 });
 			else
 				setCookie('accounts', getCookie('accounts') + ' ' + $('#login').val(), { expires: 3600*10 });
-			setCookie($('#login').val(), JSON.stringify(accounts[$('#login').val()]), { expires: 3600*10 });
+			setCookie($('#login').val(), JSON.stringify( flatten(accounts[$('#login').val()]) ), { expires: 3600*10 });
 
 			addRounded($('#login').val());
 		}
@@ -102,6 +102,14 @@ $('#getEscrowButton').click(function(){
 		}
 	});
 });
+
+function flatten(obj) {
+    var result = Object.create(obj);
+    for(var key in result) {
+        result[key] = result[key];
+    }
+    return result;
+}
 
 function create_addNewAccount(){
 	$('.rounded').append('<li id="addnewaccount"><a href="#">ADD NEW ACCOUNT</a></li>');
