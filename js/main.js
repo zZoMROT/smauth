@@ -134,13 +134,7 @@ function load_cookies(){
 		var arr_cookie_acc = cookie_accounts.split(' ');
 		for(var i = 0; i < arr_cookie_acc.length; i++){
 			if(getCookie(arr_cookie_acc[i]) != undefined)
-				accounts[arr_cookie_acc[i]] = JSON.parse( getCookie(arr_cookie_acc[i]), function(k, v){
-					if(typeof v == "string"){
-						if(v.substr(0, 8) == "function")
-							return eval(v);
-					}
-					return v;
-				} );
+				accounts[arr_cookie_acc[i]] = JSON.parse( getCookie(arr_cookie_acc[i]) );
 		}
 	}
 }
