@@ -92,6 +92,8 @@ $('#getEscrowButton').click(function(){
 		if(result.status == 'error'){
 			$('.notification').show();
 			var error_msg = result.err;
+			if(result.err.indexOf('Malformed response') !== -1)
+				error_msg = "Your account is limited. Check https://steamcommunity.com/chat to see it."
 			$('.notification').html(error_msg);
 			$('#getEscrowButton').show();
 			$("#gettingEscrowText").hide();
