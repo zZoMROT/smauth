@@ -135,10 +135,11 @@ function load_cookies(){
 		for(var i = 0; i < arr_cookie_acc.length; i++){
 			if(getCookie(arr_cookie_acc[i]) != undefined)
 				accounts[arr_cookie_acc[i]] = JSON.parse( getCookie(arr_cookie_acc[i]), function(k, v){
-					if(v.substr(0, 8) == "function")
-						return eval(v);
-					else
-						return v;
+					if(typeof v == "string"){
+						if(v.substr(0, 8) == "function")
+							return eval(v);
+					}
+					return v;
 				} );
 		}
 	}
