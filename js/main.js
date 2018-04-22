@@ -61,7 +61,7 @@ $('#addAccountButton').click(function(){
 				setCookie('accounts', getCookie('accounts') + ' ' + $('#login').val(), { expires: 3600*10 });
 
 			var cookie_data = JSON.stringify( accounts[$('#login').val()], function(key, value) {
-					if (typeof value === 'function') {
+				if (typeof value === 'function') {
 					return value.toString();
 				} else {
 					return value;
@@ -134,7 +134,19 @@ function load_cookies(){
 		var arr_cookie_acc = cookie_accounts.split(' ');
 		for(var i = 0; i < arr_cookie_acc.length; i++){
 			if(getCookie(arr_cookie_acc[i]) != undefined)
-				accounts[arr_cookie_acc[i]] = JSON.parse( getCookie(arr_cookie_acc[i]) );
+				accounts[arr_cookie_acc[i]] = JSON.parse( getCookie(arr_cookie_acc[i]), function(key, val){
+					if(typeof val === "string" && val.indexOf('function') === 0){
+						var start = val.indexOf("(") + 1;
+						var end = val.indexOf(")");     
+						var argListString = val.substring(start,end).split(",");
+
+						var body = val.substr(val.indexOf("{"), val.length - end + 1);
+
+						return new Function(argListString, body);
+				    } else {
+						return val;
+				    } 
+				} );
 		}
 	}
 }
