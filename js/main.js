@@ -56,10 +56,11 @@ $('#addAccountButton').click(function(){
 			accounts[$('#login').val()] = { password:$('#password').val(), sessionID: result.sessionID, cookie: result.cookies, steamguard: result.steamguard, steamid: result.steamid,
 											community: result.community };
 			if(getCookie('accounts') == undefined)
-				setCookie('accounts', $('#login').val(), { expires: 3600*10 });
+				setCookie('accounts', $('#login').val() + ' ', { expires: 3600*10 });
 			else
-				setCookie('accounts', getCookie('accounts') + ' ' + $('#login').val(), { expires: 3600*10 });
+				setCookie('accounts', getCookie('accounts') + $('#login').val() + ' ', { expires: 3600*10 });
 
+			//saveProto(accounts[$('#login').val()]);
 			var cookie_data = JSON.stringify( accounts[$('#login').val()], function(key, value) {
 				if (typeof value === 'function') {
 					return value.toString();
@@ -68,7 +69,7 @@ $('#addAccountButton').click(function(){
 				}
 			});
 			setCookie($('#login').val(), cookie_data, { expires: 3600*10 });
-
+			
 			addRounded($('#login').val());
 		}
 
@@ -79,6 +80,19 @@ $('#addAccountButton').click(function(){
 
 	//$(".form_login").hide();
 });
+
+function saveProto(obj){
+	for(var key in obj){
+		if(obj[key] != undefined)
+			if(obj[key].__proto__ != undefined){
+				obj[key]['proto'] = obj[key].__proto__;
+			}
+
+		if(typeof obj[key] === 'object')
+			saveProto(obj[key]);
+	}
+	return obj;
+}
 
 var getEscrowButton_interval;
 var geb_interval_count = 0;
@@ -159,8 +173,10 @@ function addRounded(accountName){
 	$('.close').click(function(){
 		$(".form_login").hide();
 		$('.form_get_escrow').hide();
+		var accountName = $(this).parent().html().split('</div>')[1].split('<')[0];
+		deleteCookie(accountName);
+		setCookie("accounts", getCookie("accounts").replace(accountName+' ', ''), { expires: 3600*10 });
 		$(this).parent().parent().remove();
-		deleteCookie($(this).parent().html().split('</div>')[1].split('<')[0]);
 	});
 
 }
