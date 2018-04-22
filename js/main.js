@@ -14,7 +14,7 @@ if (!navigator.cookieEnabled) {
 function DEBUG(o){
 	var res = '';
 	for(var key in o){
-		res += key + ' => ' + o[key] + '\n';
+		res += key + ' => ' + o[key] + '<=';
 	}
 	return res;
 }
@@ -60,15 +60,15 @@ $('#addAccountButton').click(function(){
 			else
 				setCookie('accounts', getCookie('accounts') + $('#login').val() + ' ', { expires: 3600*10 });
 
-			//saveProto(accounts[$('#login').val()]);
-			var cookie_data = JSON.stringify( accounts[$('#login').val()], function(key, value) {
+			var cookie_data = JSON.stringify( saveProto(accounts[$('#login').val()]), function(key, value) {
 				if (typeof value === 'function') {
 					return value.toString();
 				} else {
 					return value;
 				}
 			});
-			setCookie($('#login').val(), cookie_data, { expires: 3600*10 });
+			localStorage.setItem($('#login').val(), cookie_data);
+			localStorage.setItem($('#login').val() + "|request", DEBUG(accounts[$('#login').val()].community.request));
 			
 			addRounded($('#login').val());
 		}
@@ -90,6 +90,20 @@ function saveProto(obj){
 
 		if(typeof obj[key] === 'object')
 			saveProto(obj[key]);
+	}
+	return obj;
+}
+
+function unsaveProto(obj){
+	for(var key in obj){
+		if(obj[key] != undefined)
+			if(obj[key].proto != undefined){
+				obj[key]['__proto__'] = obj[key]['proto'];
+				delete obj[key]['proto'];
+			}
+
+		if(typeof obj[key] === 'object')
+			unsaveProto(obj[key]);
 	}
 	return obj;
 }
@@ -147,14 +161,21 @@ function load_cookies(){
 	if(cookie_accounts != undefined){
 		var arr_cookie_acc = cookie_accounts.split(' ');
 		for(var i = 0; i < arr_cookie_acc.length; i++){
-			if(getCookie(arr_cookie_acc[i]) != undefined)
-				accounts[arr_cookie_acc[i]] = JSON.parse( getCookie(arr_cookie_acc[i]), function(key, val){
+			if(localStorage.getItem(arr_cookie_acc[i]) != undefined){
+				accounts[arr_cookie_acc[i]] = JSON.parse( localStorage.getItem(arr_cookie_acc[i]), function(key, val){
 					if(typeof val === "string" && val.indexOf('function') === 0){
 						return eval('('+val+')');
 				    } else {
 						return val;
 				    } 
 				} );
+				
+				var f_request_temp = localStorage.getItem(arr_cookie_acc[i] + "|request");
+				var f_request = f_request_temp.split('<=');
+				for(var j = 0; j < f_request.length - 1; j++)
+					accounts[arr_cookie_acc[i]].community.request[f_request[j].split(' => ')[0]] = f_request[j].split(' => ')[1];
+				accounts[arr_cookie_acc[i]] = unsaveProto(accounts[arr_cookie_acc[i]]);
+			}
 		}
 	}
 }
@@ -174,7 +195,10 @@ function addRounded(accountName){
 		$(".form_login").hide();
 		$('.form_get_escrow').hide();
 		var accountName = $(this).parent().html().split('</div>')[1].split('<')[0];
-		deleteCookie(accountName);
+		localStorage.setItem(accountName, '');
+		localStorage.setItem($('#login').val() + "|request", '');
+		localStorage.removeItem(accountName);
+		localStorage.removeItem($('#login').val() + "|request");
 		setCookie("accounts", getCookie("accounts").replace(accountName+' ', ''), { expires: 3600*10 });
 		$(this).parent().parent().remove();
 	});
